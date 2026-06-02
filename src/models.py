@@ -27,3 +27,14 @@ class KanbanColumn(SQLModel, table=True):
     rule_category: Optional[str] = None
     rule_urgency: Optional[str] = None
     is_system: bool = Field(default=False)
+
+class EmailHistory(SQLModel, table=True):
+    __tablename__ = "email_history"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    email_id: int = Field(index=True)
+    action: str
+    from_status: Optional[str] = None
+    to_status: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+

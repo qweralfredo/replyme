@@ -12,7 +12,8 @@ def migrate():
             KanbanColumn(status_key="processing", name="Processing", position=2, is_system=True),
             KanbanColumn(status_key="review", name="Review Required", position=3, is_system=True),
             KanbanColumn(status_key="to_send", name="To Send (Queue)", position=4, is_system=True),
-            KanbanColumn(status_key="done", name="Done / Sent", position=5, is_system=True)
+            KanbanColumn(status_key="done", name="Done / Sent", position=5, is_system=True),
+            KanbanColumn(status_key="archive", name="Archive", position=99, is_system=True)
         ]
         
         for col in default_columns:

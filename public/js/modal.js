@@ -16,13 +16,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!card) return;
         
         const data = card.aiData;
-        if (!data) return;
+        const item = card.aiData;
+        if (!item) return;
 
         // ST3.1: Populate modal data
-        inputId.value = data.id;
-        inputCat.value = data.ai_category || 'N/A';
-        inputUrg.value = data.ai_urgency || 'N/A';
-        inputRes.value = data.ai_response || '';
+        inputId.value = item.id;
+        inputCat.value = item.ai_category || 'N/A';
+        inputUrg.value = item.ai_urgency || 'N/A';
+        document.getElementById('modal-response').value = item.ai_response || '';
+            
+        // Fetch and render history
+        const timeline = document.getElementById('history-timeline');
+        timeline.innerHTML = '<li>Loading history...</li>';
+        
+        try {
+            const res = await fetch(`http://localhost:8080/src/api/history.php?email_id=${item.id}`);
+            const history = await res.json();
+            
+            timeline.innerHTML = '';
+            if (history.length === 0) {
+                timeline.innerHTML = '<li>No history recorded yet.</li>';
+            } else {
+                history.forEach(h => {
+                    const li = document.createElement('li');
+                    const date = new Date(h.created_at).toLocaleString();
+                    
+                    let text = h.action;
+                    if (h.from_status && h.to_status) {
+                        text += ` <br><small>(${h.from_status} ➔ ${h.to_status})</small>`;
+                    } else if (h.to_status) {
+                        text += ` <br><small>(➔ ${h.to_status})</small>`;
+                    }
+                    
+                    li.innerHTML = `<span class="timeline-date">${date}</span> ${text}`;
+                    timeline.appendChild(li);
+                });
+            }
+        } catch (err) {
+            timeline.innerHTML = '<li style="color:red">Failed to load history</li>';
+        }
 
         modal.classList.remove('hidden');
     });

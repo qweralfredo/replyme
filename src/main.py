@@ -39,6 +39,12 @@ def poll_mailpit():
                 
                 new_email = Email(sender=sender, subject=subject, body=body.strip(), status="inbox")
                 session.add(new_email)
+                session.flush() # Get email.id
+                
+                from src.models import EmailHistory
+                history = EmailHistory(email_id=new_email.id, action="Email ingested from Mailpit", to_status="inbox")
+                session.add(history)
+                
                 processed_mailpit_ids.add(msg_id)
                 logger.info("Ingested email from Mailpit", mailpit_id=msg_id)
         session.commit()
@@ -104,6 +110,15 @@ def worker_loop():
                             email.status = matched_status
                             email.processed_at = datetime.utcnow()
                             session.add(email)
+                            
+                            history = EmailHistory(
+                                email_id=email.id, 
+                                action=f"AI Classification (Cat: {email.ai_category}, Urg: {email.ai_urgency})", 
+                                from_status="processing", 
+                                to_status=matched_status
+                            )
+                            session.add(history)
+                            
                         except Exception as e:
                             logger.error("Error classifying email", id=email.id, error=str(e))
                             email.status = "error"
@@ -148,6 +163,15 @@ def dispatch_loop():
                                 
                                 email.status = "sent"
                                 session.add(email)
+                                
+                                from src.models import EmailHistory
+                                history = EmailHistory(
+                                    email_id=email.id,
+                                    action="Automated reply sent via SMTP",
+                                    from_status="to_send",
+                                    to_status="sent"
+                                )
+                                session.add(history)
                     except Exception as smtp_err:
                         logger.error("Failed to connect to SMTP server", error=str(smtp_err))
                     

@@ -23,16 +23,18 @@ if (!$data || !isset($data['id'])) {
     ResponseFactory::error('ID is required', 400);
 }
 
-$valid_statuses = ['inbox', 'processing', 'review', 'done', 'error'];
-
-if (isset($data['status']) && !in_array($data['status'], $valid_statuses)) {
-    ResponseFactory::error('Invalid status', 422);
-}
-
 try {
     $pdo = Database::getInstance();
     
-    // We update status and optionally ai_response if provided
+    // Get current status to log history
+    $stmt = $pdo->prepare("SELECT status FROM emails WHERE id = :id");
+    $stmt->execute([':id' => $data['id']]);
+    $current = $stmt->fetch();
+    if (!$current) {
+        ResponseFactory::error('Work item not found', 404);
+    }
+    $old_status = $current['status'];
+
     $updates = [];
     $params = [];
     
@@ -57,9 +59,16 @@ try {
     $stmt->execute($params);
     
     $updated = $stmt->fetch();
-    
-    if (!$updated) {
-        ResponseFactory::error('Work item not found', 404);
+
+    if (isset($data['status']) && $data['status'] !== $old_status) {
+        $hist_sql = "INSERT INTO email_history (email_id, action, from_status, to_status) VALUES (?, ?, ?, ?)";
+        $hist_stmt = $pdo->prepare($hist_sql);
+        $hist_stmt->execute([
+            $data['id'],
+            "Manual card move",
+            $old_status,
+            $data['status']
+        ]);
     }
     
     ResponseFactory::json($updated);
