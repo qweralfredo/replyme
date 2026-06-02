@@ -20,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ST3.1: Populate modal data
         inputId.value = data.id;
-        inputCat.value = data.category || 'N/A';
-        inputUrg.value = data.urgency || 'N/A';
+        inputCat.value = data.ai_category || 'N/A';
+        inputUrg.value = data.ai_urgency || 'N/A';
         inputRes.value = data.ai_response || '';
 
         modal.classList.remove('hidden');
