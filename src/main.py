@@ -3,12 +3,52 @@ import structlog
 from datetime import datetime
 from threading import Thread
 
+import urllib.request
+import json
 from sqlmodel import Session
 from src.database import engine
 from src.services.ingestion import EmailIngestionService
 from src.services.ai_classifier import AIClassifierService
+from src.models import Email
 
 logger = structlog.get_logger(__name__)
+
+processed_mailpit_ids = set()
+
+def poll_mailpit():
+    try:
+        req = urllib.request.Request("http://mailpit:8025/api/v1/messages")
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            
+        messages = data.get("messages", [])
+        if not messages:
+            return
+            
+        with Session(engine) as session:
+            for msg in messages:
+                msg_id = msg.get("ID")
+                if msg_id and msg_id not in processed_mailpit_ids:
+                    # Fetch details
+                    try:
+                        detail_req = urllib.request.Request(f"http://mailpit:8025/api/v1/message/{msg_id}")
+                        with urllib.request.urlopen(detail_req) as detail_res:
+                            detail_data = json.loads(detail_res.read().decode())
+                            
+                        subject = detail_data.get("Subject", "No Subject")
+                        sender = detail_data.get("From", {}).get("Address", "Unknown")
+                        body = detail_data.get("Text", "No Body")
+                        
+                        new_email = Email(sender=sender, subject=subject, body=body.strip(), status="inbox")
+                        session.add(new_email)
+                        processed_mailpit_ids.add(msg_id)
+                        logger.info("Ingested email from Mailpit", mailpit_id=msg_id)
+                    except Exception as e:
+                        logger.error("Failed to fetch message details from Mailpit", error=str(e))
+            session.commit()
+    except Exception as e:
+        # Mailpit might not be up, just ignore
+        pass
 
 def worker_loop():
     logger.info("Starting replyme worker loop...")
@@ -16,6 +56,9 @@ def worker_loop():
     classifier_service = AIClassifierService()
 
     while True:
+        # Poll Mailpit for incoming emails
+        poll_mailpit()
+
         try:
             with Session(engine) as session:
                 # 1. Fetch pending emails directly in this session

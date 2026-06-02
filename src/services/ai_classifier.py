@@ -20,6 +20,7 @@ class AIClassifierService:
         self.api_key = os.environ.get("GOOGLE_API_KEY", "")
         if not self.api_key:
             logger.warning("GOOGLE_API_KEY is not set. Real AI classification will fail.")
+            self.api_key = "dummy_to_prevent_init_crash"
             
         self.client = instructor.from_genai(
             genai.Client(api_key=self.api_key),

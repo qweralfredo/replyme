@@ -41,6 +41,14 @@ services:
     networks:
       - replyme_network
 
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP
+    networks:
+      - replyme_network
+
 volumes:
   db_data:
 
