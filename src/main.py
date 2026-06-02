@@ -16,39 +16,32 @@ logger = structlog.get_logger(__name__)
 processed_mailpit_ids = set()
 
 def poll_mailpit():
-    try:
-        req = urllib.request.Request("http://mailpit:8025/api/v1/messages")
-        with urllib.request.urlopen(req) as response:
-            data = json.loads(response.read().decode())
-            
-        messages = data.get("messages", [])
-        if not messages:
-            return
-            
-        with Session(engine) as session:
-            for msg in messages:
-                msg_id = msg.get("ID")
-                if msg_id and msg_id not in processed_mailpit_ids:
-                    # Fetch details
-                    try:
-                        detail_req = urllib.request.Request(f"http://mailpit:8025/api/v1/message/{msg_id}")
-                        with urllib.request.urlopen(detail_req) as detail_res:
-                            detail_data = json.loads(detail_res.read().decode())
-                            
-                        subject = detail_data.get("Subject", "No Subject")
-                        sender = detail_data.get("From", {}).get("Address", "Unknown")
-                        body = detail_data.get("Text", "No Body")
-                        
-                        new_email = Email(sender=sender, subject=subject, body=body.strip(), status="inbox")
-                        session.add(new_email)
-                        processed_mailpit_ids.add(msg_id)
-                        logger.info("Ingested email from Mailpit", mailpit_id=msg_id)
-                    except Exception as e:
-                        logger.error("Failed to fetch message details from Mailpit", error=str(e))
-            session.commit()
-    except Exception as e:
-        # Mailpit might not be up, just ignore
-        pass
+    req = urllib.request.Request("http://mailpit:8025/api/v1/messages")
+    with urllib.request.urlopen(req) as response:
+        data = json.loads(response.read().decode())
+        
+    messages = data.get("messages", [])
+    if not messages:
+        return
+        
+    with Session(engine) as session:
+        for msg in messages:
+            msg_id = msg.get("ID")
+            if msg_id and msg_id not in processed_mailpit_ids:
+                # Fetch details
+                detail_req = urllib.request.Request(f"http://mailpit:8025/api/v1/message/{msg_id}")
+                with urllib.request.urlopen(detail_req) as detail_res:
+                    detail_data = json.loads(detail_res.read().decode())
+                    
+                subject = detail_data.get("Subject", "No Subject")
+                sender = detail_data.get("From", {}).get("Address", "Unknown")
+                body = detail_data.get("Text", "No Body")
+                
+                new_email = Email(sender=sender, subject=subject, body=body.strip(), status="inbox")
+                session.add(new_email)
+                processed_mailpit_ids.add(msg_id)
+                logger.info("Ingested email from Mailpit", mailpit_id=msg_id)
+        session.commit()
 
 def worker_loop():
     logger.info("Starting replyme worker loop...")
@@ -101,7 +94,8 @@ def worker_loop():
                     session.commit()
                     logger.info("Batch processed successfully", count=len(pending_emails))
         except Exception as e:
-            logger.error("Error in worker loop", error=str(e))
+            logger.exception("Fatal error in worker loop, crashing container to allow restart", error=str(e))
+            raise
         
         # Sleep before next poll
         time.sleep(5)

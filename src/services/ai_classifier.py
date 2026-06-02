@@ -19,8 +19,7 @@ class AIClassifierService:
         # We assume GOOGLE_API_KEY is available in the environment
         self.api_key = os.environ.get("GOOGLE_API_KEY", "")
         if not self.api_key:
-            logger.warning("GOOGLE_API_KEY is not set. Real AI classification will fail.")
-            self.api_key = "dummy_to_prevent_init_crash"
+            raise ValueError("GOOGLE_API_KEY environment variable is required. Please set it in your .env or docker-compose.yml.")
             
         self.client = instructor.from_genai(
             genai.Client(api_key=self.api_key),
