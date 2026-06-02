@@ -7,7 +7,6 @@ from sqlmodel import Session
 from src.database import engine
 from src.services.ingestion import EmailIngestionService
 from src.services.ai_classifier import AIClassifierService
-from src.simulator import run_simulator
 
 logger = structlog.get_logger(__name__)
 
@@ -45,8 +44,8 @@ def worker_loop():
                             email.ai_urgency = str(classification.urgency)
                             email.ai_summary = classification.summary
                             
-                            # Generate a mock response for now
-                            email.ai_response = f"Prezado cliente, recebemos sua mensagem classificada como {classification.category}. Nossa equipe irá tratar isso com urgência {classification.urgency}."
+                            # Use LLM-generated response draft
+                            email.ai_response = classification.response
                             
                             email.status = "review"
                             email.processed_at = datetime.utcnow()
@@ -65,9 +64,5 @@ def worker_loop():
         time.sleep(5)
 
 if __name__ == "__main__":
-    # Start simulator in a background thread for testing purposes
-    sim_thread = Thread(target=run_simulator, daemon=True)
-    sim_thread.start()
-    
     # Run main worker loop
     worker_loop()

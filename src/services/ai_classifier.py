@@ -12,11 +12,15 @@ class EmailClassification(BaseModel):
     sentiment: str = Field(description="The sentiment of the email (positive, neutral, negative)")
     urgency: str = Field(description="The urgency of the email (low, medium, high)")
     summary: str = Field(description="A brief executive summary of the email content")
+    response: str = Field(description="A draft of a professional, polite and direct reply to the customer's email based on the context.")
 
 class AIClassifierService:
     def __init__(self):
         # We assume GOOGLE_API_KEY is available in the environment
-        self.api_key = os.environ.get("GOOGLE_API_KEY", "dummy_key_for_tests")
+        self.api_key = os.environ.get("GOOGLE_API_KEY", "")
+        if not self.api_key:
+            logger.warning("GOOGLE_API_KEY is not set. Real AI classification will fail.")
+            
         self.client = instructor.from_genai(
             genai.Client(api_key=self.api_key),
             mode=instructor.Mode.GENAI_STRUCTURED_OUTPUTS,
@@ -25,16 +29,6 @@ class AIClassifierService:
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     def classify_email(self, email_body: str) -> EmailClassification:
         logger.info("Classifying email content", body_length=len(email_body))
-        
-        # If testing with dummy key, we mock the response to avoid API calls without proper credentials
-        if self.api_key == "dummy_key_for_tests":
-            logger.info("Using dummy API key, returning mocked classification")
-            return EmailClassification(
-                category="general",
-                sentiment="neutral",
-                urgency="low",
-                summary="Mocked summary"
-            )
 
         try:
             resp = self.client.chat.completions.create(
