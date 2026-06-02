@@ -17,3 +17,13 @@ class Email(SQLModel, table=True):
     ai_response: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     processed_at: Optional[datetime] = None
+
+class KanbanColumn(SQLModel, table=True):
+    __tablename__ = "kanban_columns"
+    
+    status_key: str = Field(primary_key=True)
+    name: str
+    position: int
+    rule_category: Optional[str] = None
+    rule_urgency: Optional[str] = None
+    is_system: bool = Field(default=False)

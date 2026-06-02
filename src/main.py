@@ -79,11 +79,29 @@ def worker_loop():
                             email.ai_sentiment = classification.sentiment
                             email.ai_urgency = str(classification.urgency)
                             email.ai_summary = classification.summary
-                            
-                            # Use LLM-generated response draft
                             email.ai_response = classification.response
                             
-                            email.status = "review"
+                            # Fetch columns rules to determine status
+                            from src.models import KanbanColumn
+                            rules = session.exec(select(KanbanColumn)).all()
+                            
+                            matched_status = "review" # Default fallback
+                            for col in rules:
+                                # Simple matching logic (ignore case)
+                                cat_match = True
+                                urg_match = True
+                                
+                                if col.rule_category:
+                                    cat_match = col.rule_category.lower() == classification.category.lower()
+                                if col.rule_urgency:
+                                    urg_match = col.rule_urgency.lower() == str(classification.urgency).lower()
+                                    
+                                if col.rule_category or col.rule_urgency:
+                                    if cat_match and urg_match:
+                                        matched_status = col.status_key
+                                        break
+                                        
+                            email.status = matched_status
                             email.processed_at = datetime.utcnow()
                             session.add(email)
                         except Exception as e:
@@ -100,6 +118,50 @@ def worker_loop():
         # Sleep before next poll
         time.sleep(5)
 
+def dispatch_loop():
+    import smtplib
+    from email.message import EmailMessage
+    
+    logger.info("Starting replyme dispatch queue loop...")
+    while True:
+        try:
+            with Session(engine) as session:
+                from sqlmodel import select
+                from src.models import Email
+                
+                # Fetch pending emails to send
+                statement = select(Email).where(Email.status == "to_send").limit(5).with_for_update(skip_locked=True)
+                pending_dispatch = list(session.exec(statement).all())
+                
+                if pending_dispatch:
+                    try:
+                        with smtplib.SMTP('mailpit', 1025) as s:
+                            for email in pending_dispatch:
+                                msg = EmailMessage()
+                                msg.set_content(email.ai_response or "No response provided.")
+                                msg['Subject'] = f"Re: {email.subject}"
+                                msg['From'] = 'suporte@replyme.local'
+                                msg['To'] = email.sender
+                                
+                                s.send_message(msg)
+                                logger.info("Dispatched automated reply", id=email.id, to=email.sender)
+                                
+                                email.status = "sent"
+                                session.add(email)
+                    except Exception as smtp_err:
+                        logger.error("Failed to connect to SMTP server", error=str(smtp_err))
+                    
+                    session.commit()
+        except Exception as e:
+            logger.exception("Fatal error in dispatch loop", error=str(e))
+        
+        time.sleep(3)
+
+
 if __name__ == "__main__":
+    # Run dispatch loop in background
+    dispatch_thread = Thread(target=dispatch_loop, daemon=True)
+    dispatch_thread.start()
+    
     # Run main worker loop
     worker_loop()

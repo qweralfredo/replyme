@@ -141,9 +141,37 @@ body {
     border-radius: 50%;
 }
 
-.urgency-high { background: var(--accent-high); box-shadow: 0 0 8px var(--accent-high); }
-.urgency-medium { background: var(--accent-medium); box-shadow: 0 0 8px var(--accent-medium); }
-.urgency-low { background: var(--accent-low); box-shadow: 0 0 8px var(--accent-low); }
+.urgency-low { background-color: #2ecc71; }
+.urgency-medium { background-color: #f1c40f; }
+.urgency-high { background-color: #e74c3c; }
+
+/* Dynamic To Send Column */
+.column-to-send {
+    border: 2px dashed var(--accent-high);
+    background: rgba(231, 76, 60, 0.05);
+}
+
+.column-to-send h2 {
+    color: var(--accent-high);
+}
+
+/* Settings Modal */
+#settings-columns-list li {
+    background: var(--bg-dark);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-glass);
+    margin-bottom: 8px;
+}
+.btn-delete {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+.btn-delete:hover {
+    transform: scale(1.1);
+}
 
 .card-body {
     font-size: 0.95rem;
