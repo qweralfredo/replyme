@@ -9,7 +9,7 @@ from sqlmodel import Session
 from src.database import engine
 from src.services.ingestion import EmailIngestionService
 from src.services.ai_classifier import AIClassifierService
-from src.models import Email
+from src.models import Email, EmailHistory, KanbanColumn
 
 logger = structlog.get_logger(__name__)
 
