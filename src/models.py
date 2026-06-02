@@ -10,5 +10,10 @@ class Email(SQLModel, table=True):
     subject: str
     body: str
     status: str = Field(default="inbox")  # inbox, processing, done, error
+    ai_category: Optional[str] = None
+    ai_sentiment: Optional[str] = None
+    ai_urgency: Optional[str] = None
+    ai_summary: Optional[str] = None
+    ai_response: Optional[str] = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
     processed_at: Optional[datetime] = None

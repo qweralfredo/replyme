@@ -17,9 +17,9 @@ class AIClassifierService:
     def __init__(self):
         # We assume GOOGLE_API_KEY is available in the environment
         self.api_key = os.environ.get("GOOGLE_API_KEY", "dummy_key_for_tests")
-        self.client = instructor.from_gemini(
+        self.client = instructor.from_genai(
             genai.Client(api_key=self.api_key),
-            mode=instructor.Mode.GEMINI_JSON,
+            mode=instructor.Mode.GENAI_STRUCTURED_OUTPUTS,
         )
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))

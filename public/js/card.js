@@ -7,17 +7,17 @@ class KanbanCard {
         card.dataset.status = item.status;
         
         // Convert item details to string formats
-        const urgencyClass = `urgency-${(item.urgency || 'low').toLowerCase()}`;
-        const category = item.category || 'General';
+        const urgencyClass = `urgency-${(item.ai_urgency || 'low').toLowerCase()}`;
+        const category = item.ai_category || 'General';
         const aiResponse = item.ai_response || 'Pending AI processing...';
 
         card.innerHTML = `
             <div class="card-header">
                 <span class="card-title">Email #${item.id}</span>
-                <div class="urgency-indicator ${urgencyClass}" title="Urgency: ${item.urgency}"></div>
+                <div class="urgency-indicator ${urgencyClass}" title="Urgency: ${item.ai_urgency}"></div>
             </div>
             <div class="card-body">
-                ${item.summary ? item.summary : 'No summary available.'}
+                ${item.ai_summary ? item.ai_summary : 'No summary available.'}
             </div>
             <div class="card-footer">
                 <span class="tag">${category}</span>
