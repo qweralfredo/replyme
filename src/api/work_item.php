@@ -61,7 +61,7 @@ try {
     $updated = $stmt->fetch();
 
     if (isset($data['status']) && $data['status'] !== $old_status) {
-        $hist_sql = "INSERT INTO email_history (email_id, action, from_status, to_status) VALUES (?, ?, ?, ?)";
+        $hist_sql = "INSERT INTO email_history (email_id, action, from_status, to_status, created_at) VALUES (?, ?, ?, ?, NOW())";
         $hist_stmt = $pdo->prepare($hist_sql);
         $hist_stmt->execute([
             $data['id'],
