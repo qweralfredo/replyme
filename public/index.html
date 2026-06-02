@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReplyMe - Kanban Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <h1>ReplyMe <span class="badge">Cognitive Hub</span></h1>
+            <p>Supervise and override AI classification decisions seamlessly.</p>
+        </header>
+
+        <main class="kanban-board">
+            <!-- Inbox Column -->
+            <section class="kanban-column" id="col-inbox" data-status="inbox">
+                <h2>Inbox</h2>
+                <div class="kanban-dropzone" id="drop-inbox"></div>
+            </section>
+
+            <!-- Processing Column -->
+            <section class="kanban-column" id="col-processing" data-status="processing">
+                <h2>Processing</h2>
+                <div class="kanban-dropzone" id="drop-processing"></div>
+            </section>
+
+            <!-- Review Column -->
+            <section class="kanban-column" id="col-review" data-status="review">
+                <h2>Review Required</h2>
+                <div class="kanban-dropzone" id="drop-review"></div>
+            </section>
+
+            <!-- Done Column -->
+            <section class="kanban-column" id="col-done" data-status="done">
+                <h2>Done</h2>
+                <div class="kanban-dropzone" id="drop-done"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- AI Review Modal -->
+    <div id="ai-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Review AI Response</h2>
+                <button id="close-modal" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="review-form">
+                    <input type="hidden" id="modal-card-id">
+                    
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" id="modal-category" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Urgency</label>
+                        <input type="text" id="modal-urgency" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>AI Response</label>
+                        <textarea id="modal-response" rows="6"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Approve & Mark Done</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/card.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/kanban.js"></script>
+</body>
+</html>
