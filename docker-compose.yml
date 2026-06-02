@@ -11,6 +11,7 @@ services:
       - .:/app
     networks:
       - replyme_network
+    env_file: .env
     depends_on:
       - db
 
