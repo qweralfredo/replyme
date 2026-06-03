@@ -36,8 +36,9 @@ def poll_mailpit():
                 subject = detail_data.get("Subject", "No Subject")
                 sender = detail_data.get("From", {}).get("Address", "Unknown")
                 body = detail_data.get("Text", "No Body")
+                body_html = detail_data.get("HTML", "")
                 
-                new_email = Email(sender=sender, subject=subject, body=body.strip(), status="inbox")
+                new_email = Email(sender=sender, subject=subject, body=body.strip(), body_html=body_html, status="inbox")
                 session.add(new_email)
                 session.flush() # Get email.id
                 

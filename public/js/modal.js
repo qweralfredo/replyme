@@ -106,4 +106,44 @@ document.addEventListener('DOMContentLoaded', () => {
             }).showToast();
         }
     });
+
+    // Email Viewer Modal Logic
+    const viewerModal = document.getElementById('email-viewer-modal');
+    const closeViewerBtn = document.getElementById('close-email-viewer');
+    const iframe = document.getElementById('email-iframe');
+    const btnViewEmail = document.getElementById('btn-view-email');
+    
+    let currentEmailData = null;
+
+    document.querySelector('.kanban-board').addEventListener('click', (e) => {
+        const card = e.target.closest('.kanban-card');
+        if (card) {
+            currentEmailData = card.aiData;
+        }
+    });
+
+    btnViewEmail.addEventListener('click', () => {
+        if (!currentEmailData) return;
+        
+        let htmlContent = currentEmailData.body_html;
+        if (!htmlContent) {
+            // Fallback for plain text emails
+            htmlContent = `<div style="font-family: sans-serif; padding: 20px; color: #333; line-height: 1.5; white-space: pre-wrap;">${currentEmailData.body || 'No content available.'}</div>`;
+        }
+        
+        iframe.srcdoc = htmlContent;
+        viewerModal.classList.remove('hidden');
+    });
+
+    closeViewerBtn.addEventListener('click', () => {
+        viewerModal.classList.add('hidden');
+        iframe.srcdoc = ''; // clear to stop embedded media playing
+    });
+
+    viewerModal.addEventListener('click', (e) => {
+        if (e.target === viewerModal) {
+            viewerModal.classList.add('hidden');
+            iframe.srcdoc = '';
+        }
+    });
 });

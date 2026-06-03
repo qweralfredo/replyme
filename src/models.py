@@ -9,6 +9,7 @@ class Email(SQLModel, table=True):
     sender: str
     subject: str
     body: str
+    body_html: Optional[str] = None
     status: str = Field(default="inbox")  # inbox, processing, done, error
     ai_category: Optional[str] = None
     ai_sentiment: Optional[str] = None
