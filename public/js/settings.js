@@ -27,8 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.style.display = 'flex';
                 li.style.justifyContent = 'space-between';
                 li.innerHTML = `
-                    <span><strong>${c.name}</strong> (${c.status_key}) ${c.rule_category ? `<br><small>Rules: [Cat: ${c.rule_category}, Urg: ${c.rule_urgency}]</small>` : ''}</span>
-                    ${!c.is_system ? `<button class="btn-delete" data-key="${c.status_key}">🗑️</button>` : '<span>(System)</span>'}
+                    <span><strong>${c.name}</strong> (${c.status_key}) ${c.rule_category ? `<br><small>Regras: [Cat: ${c.rule_category}, Urg: ${c.rule_urgency}]</small>` : ''}</span>
+                    ${!c.is_system ? `<button class="btn-delete" data-key="${c.status_key}">🗑️</button>` : '<span style="color:var(--text-muted); font-size:0.8rem;">(Sistema)</span>'}
                 `;
                 colsList.appendChild(li);
             });

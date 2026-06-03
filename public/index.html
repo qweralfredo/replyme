@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ReplyMe - Kanban Dashboard</title>
+    <title>ReplyMe - Painel Kanban</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
@@ -15,12 +15,12 @@
         <header class="header">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
-                    <h1>ReplyMe <span class="badge">Cognitive Hub</span></h1>
-                    <p>Supervise and override AI classification decisions seamlessly.</p>
+                    <h1>ReplyMe <span class="badge">Hub Cognitivo</span></h1>
+                    <p>Supervisione e gerencie as decisões de classificação da Inteligência Artificial de forma simples.</p>
                 </div>
                 <button id="open-settings" class="btn-settings">
                     <span class="settings-icon">⚙️</span>
-                    <span>Rule Engine</span>
+                    <span>Motor de Regras</span>
                 </button>
             </div>
         </header>
@@ -34,48 +34,49 @@
     <div id="settings-modal" class="modal-backdrop hidden">
         <div class="modal-content modal-large">
             <div class="modal-header">
-                <h2>Rule Engine Configuration</h2>
+                <h2>Configuração do Motor de Regras</h2>
                 <button id="close-settings" class="btn-close">&times;</button>
             </div>
             <div class="modal-body modal-grid">
                 <div class="modal-left">
                     <form id="new-column-form">
-                        <h3 style="margin-bottom: 1rem; color: var(--accent-primary);">Deploy New Routing Rule</h3>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Create dynamic columns that automatically intercept emails matching specific AI classifications.</p>
+                        <h3 style="margin-bottom: 1rem; color: var(--accent-primary);">Implantar Nova Regra de Roteamento</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Crie colunas dinâmicas que interceptam automaticamente os e-mails com base nas classificações da IA.</p>
                         
                         <div class="form-group">
-                            <label>Column Display Name</label>
-                            <input type="text" id="new-col-name" placeholder="e.g. VIP Enterprise Sales" required>
+                            <label>Nome da Coluna na Tela</label>
+                            <input type="text" id="new-col-name" placeholder="Ex: Vendas Corporativas VIP" required>
                         </div>
                         <div class="form-group">
-                            <label>Internal System Key</label>
-                            <input type="text" id="new-col-key" placeholder="e.g. vip_sales" required>
+                            <label>Chave Interna no Sistema</label>
+                            <input type="text" id="new-col-key" placeholder="Ex: vendas_vip" required>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                             <div class="form-group">
-                                <label>Target AI Category</label>
-                                <input type="text" id="new-col-category" placeholder="e.g. sales">
+                                <label>Regra de Categoria (IA)</label>
+                                <input type="text" id="new-col-category" placeholder="Ex: vendas">
                             </div>
                             <div class="form-group">
-                                <label>Target AI Urgency</label>
-                                <input type="text" id="new-col-urgency" placeholder="e.g. high">
+                                <label>Regra de Urgência (IA)</label>
+                                <input type="text" id="new-col-urgency" placeholder="Ex: alta">
                             </div>
                         </div>
-                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Deploy Rule</button>
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Implantar Regra</button>
                     </form>
                 </div>
                 <div class="modal-right">
-                    <h3 style="margin-bottom: 15px; color: var(--accent-high);">Active Kanban Columns</h3>
+                    <h3 style="margin-bottom: 15px; color: var(--accent-high);">Colunas Kanban Ativas</h3>
                     <ul id="settings-columns-list" style="list-style: none; padding: 0;"></ul>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- AI Review Modal -->
     <div id="ai-modal" class="modal-backdrop hidden">
         <div class="modal-content modal-large">
             <div class="modal-header">
-                <h2>Review AI Response</h2>
+                <h2>Revisar Resposta da IA</h2>
                 <button id="close-modal" class="btn-close">&times;</button>
             </div>
             <div class="modal-body modal-grid">
@@ -84,25 +85,25 @@
                         <input type="hidden" id="modal-card-id">
                         
                         <div class="form-group">
-                            <label>Category</label>
+                            <label>Categoria (Detectada pela IA)</label>
                             <input type="text" id="modal-category" readonly>
                         </div>
 
                         <div class="form-group">
-                            <label>Urgency</label>
+                            <label>Nível de Urgência</label>
                             <input type="text" id="modal-urgency" readonly>
                         </div>
                         
                         <div class="form-group">
-                            <label>AI Response</label>
+                            <label>Rascunho de Resposta (Editável)</label>
                             <textarea id="modal-response" rows="6"></textarea>
                         </div>
 
-                        <button type="submit" class="btn-primary" style="width: 100%">Approve & Mark Done</button>
+                        <button type="submit" class="btn-primary" style="width: 100%">Aprovar & Marcar como Concluído</button>
                     </form>
                 </div>
                 <div class="modal-right">
-                    <h3>Email Lifecycle History</h3>
+                    <h3>Linha do Tempo (Histórico)</h3>
                     <ul id="history-timeline" class="timeline"></ul>
                 </div>
             </div>

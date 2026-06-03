@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             if (!response.ok) throw new Error('API update failed');
                             
                             Toastify({
-                                text: `Item #${id} moved to ${newStatus}`,
+                                text: `Item #${id} movido para ${newStatus}`,
                                 duration: 3000,
                                 style: { background: "var(--accent-low)" }
                             }).showToast();
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } catch (err) {
                             console.error(err);
                             Toastify({
-                                text: "Error moving card. Changes reverted.",
+                                text: "Erro ao mover o card. Alterações revertidas.",
                                 duration: 3000,
                                 style: { background: "var(--accent-high)" }
                             }).showToast();
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error(err);
             Toastify({
-                text: "Failed to load board data",
+                text: "Falha ao carregar os dados do quadro",
                 style: { background: "var(--accent-high)" }
             }).showToast();
         }

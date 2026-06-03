@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputRes = document.getElementById('modal-response');
 
     // ST3.3: Optimization - Use Event Delegation on the kanban board instead of loop attaching to cards
-    document.querySelector('.kanban-board').addEventListener('click', (e) => {
+    document.querySelector('.kanban-board').addEventListener('click', async (e) => {
         const card = e.target.closest('.kanban-card');
         if (!card) return;
         
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
         // Fetch and render history
         const timeline = document.getElementById('history-timeline');
-        timeline.innerHTML = '<li>Loading history...</li>';
+        timeline.innerHTML = '<li>Carregando histórico...</li>';
         
         try {
             const res = await fetch(`http://localhost:8080/src/api/history.php?email_id=${item.id}`);
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             timeline.innerHTML = '';
             if (history.length === 0) {
-                timeline.innerHTML = '<li>No history recorded yet.</li>';
+                timeline.innerHTML = '<li>Nenhum histórico registrado ainda.</li>';
             } else {
                 history.forEach(h => {
                     const li = document.createElement('li');
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (err) {
-            timeline.innerHTML = '<li style="color:red">Failed to load history</li>';
+            timeline.innerHTML = '<li style="color:red">Falha ao carregar o histórico</li>';
         }
 
         modal.classList.remove('hidden');
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!res.ok) throw new Error('Failed to update response');
 
             Toastify({
-                text: `Item #${id} response saved and marked Done!`,
+                text: `Resposta do Item #${id} salva e marcada como Concluído!`,
                 duration: 3000,
                 style: { background: "var(--accent-low)" }
             }).showToast();
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             console.error(err);
             Toastify({
-                text: "Failed to save AI response.",
+                text: "Falha ao salvar a resposta da IA.",
                 style: { background: "var(--accent-high)" }
             }).showToast();
         }
