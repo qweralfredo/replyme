@@ -29,6 +29,18 @@ class KanbanColumn(SQLModel, table=True):
     rule_category: Optional[str] = None
     rule_urgency: Optional[str] = None
     is_system: bool = Field(default=False)
+    mcp_servers: Optional[str] = Field(default="[]")
+
+class MCPServer(SQLModel, table=True):
+    __tablename__ = "mcp_servers"
+    
+    id: Optional[int] = Field(default=None, primary_key=True)
+    name: str
+    url: str
+    status: str = Field(default="pending")  # pending, testing, installed, failed
+    inferred_command: Optional[str] = None
+    install_logs: Optional[str] = None
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class EmailHistory(SQLModel, table=True):
     __tablename__ = "email_history"

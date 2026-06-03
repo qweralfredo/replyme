@@ -18,10 +18,16 @@
                     <h1>ReplyMe <span class="badge">Hub Cognitivo</span></h1>
                     <p>Supervisione e gerencie as decisões de classificação da Inteligência Artificial de forma simples.</p>
                 </div>
-                <button id="open-settings" class="btn-settings">
-                    <span class="settings-icon">⚙️</span>
-                    <span>Motor de Regras</span>
-                </button>
+                <div style="display: flex;">
+                    <button id="open-mcp-settings" class="btn-settings" style="margin-right: 10px;">
+                        <span class="settings-icon">🔌</span>
+                        <span>Servidores MCP</span>
+                    </button>
+                    <button id="open-settings" class="btn-settings">
+                        <span class="settings-icon">⚙️</span>
+                        <span>Motor de Regras</span>
+                    </button>
+                </div>
             </div>
         </header>
 
@@ -68,6 +74,61 @@
                     <h3 style="margin-bottom: 15px; color: var(--accent-high);">Colunas Kanban Ativas</h3>
                     <ul id="settings-columns-list" style="list-style: none; padding: 0;"></ul>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MCP Settings Modal -->
+    <div id="mcp-settings-modal" class="modal-backdrop hidden">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Gerenciar Servidores MCP</h2>
+                <button id="close-mcp-settings" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body modal-grid">
+                <div class="modal-left">
+                    <form id="new-mcp-form">
+                        <h3 style="margin-bottom: 1rem; color: var(--accent-primary);">Instalar Servidor MCP (Via Agente)</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Forneça a URL do repositório ou documentação. Nossa IA cuidará da instalação, configuração e testes automaticamente.</p>
+                        <div class="form-group">
+                            <label>Nome de Exibição</label>
+                            <input type="text" id="mcp-name" placeholder="Ex: MySQL Explorer" required>
+                        </div>
+                        <div class="form-group">
+                            <label>URL (GitHub ou NPM)</label>
+                            <input type="text" id="mcp-url" placeholder="Ex: https://github.com/smithery-co/mcp-server" required>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Iniciar Instalação Agêntica</button>
+                    </form>
+                </div>
+                <div class="modal-right">
+                    <h3 style="margin-bottom: 15px; color: var(--accent-high);">Servidores Cadastrados</h3>
+                    <ul id="mcp-servers-list" style="list-style: none; padding: 0;"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign MCP Modal -->
+    <div id="assign-mcp-modal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Atribuir MCP à Coluna <span id="assign-col-name"></span></h2>
+                <button id="close-assign-mcp" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="assign-mcp-form">
+                    <input type="hidden" id="assign-status-key">
+                    <div id="mcp-checkbox-list" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Checkboxes go here -->
+                    </div>
+                    <div class="form-group" style="margin-bottom: 20px;">
+                        <label>Prompt para o Agente (Instruções)</label>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">O que o agente deve fazer com os dados deste card usando os MCPs selecionados?</p>
+                        <textarea id="mcp-prompt" rows="4" placeholder="Ex: Crie um ticket no Jira usando os detalhes desta mensagem..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary" style="width: 100%;">Salvar Atribuições</button>
+                </form>
             </div>
         </div>
     </div>

@@ -16,6 +16,14 @@ def migrate():
             session.rollback()
             print("Coluna recipient já existe ou erro ignorado:", e)
 
+        try:
+            session.exec(text("ALTER TABLE kanban_columns ADD COLUMN mcp_servers TEXT DEFAULT '[]'"))
+            session.commit()
+            print("Coluna mcp_servers adicionada com sucesso.")
+        except Exception as e:
+            session.rollback()
+            print("Coluna mcp_servers já existe ou erro ignorado:", e)
+
         default_columns = [
             KanbanColumn(status_key="inbox", name="Caixa de Entrada", position=1, is_system=True),
             KanbanColumn(status_key="processing", name="Processando", position=2, is_system=True),

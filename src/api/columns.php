@@ -63,6 +63,20 @@ try {
         $stmt->execute([$status_key]);
         ResponseFactory::json(['message' => 'Column deleted']);
     }
+    elseif ($method === 'PATCH') {
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (empty($input['status_key'])) {
+            ResponseFactory::error("Missing status_key", 400);
+        }
+
+        if (isset($input['mcp_servers'])) {
+            $stmt = $pdo->prepare("UPDATE kanban_columns SET mcp_servers = ? WHERE status_key = ?");
+            $stmt->execute([$input['mcp_servers'], $input['status_key']]);
+            ResponseFactory::json(['message' => 'Column MCPs updated successfully']);
+        } else {
+            ResponseFactory::error("No valid fields to update", 400);
+        }
+    }
     else {
         ResponseFactory::error('Method not allowed', 405);
     }
