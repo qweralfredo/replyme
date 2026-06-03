@@ -18,7 +18,10 @@
                     <h1>ReplyMe <span class="badge">Cognitive Hub</span></h1>
                     <p>Supervise and override AI classification decisions seamlessly.</p>
                 </div>
-                <button id="open-settings" class="btn-secondary">⚙️ Configure Rules</button>
+                <button id="open-settings" class="btn-settings">
+                    <span class="settings-icon">⚙️</span>
+                    <span>Rule Engine</span>
+                </button>
             </div>
         </header>
 
@@ -29,27 +32,42 @@
 
     <!-- Settings Modal -->
     <div id="settings-modal" class="modal-backdrop hidden">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
             <div class="modal-header">
-                <h2>Manage Columns & AI Rules</h2>
+                <h2>Rule Engine Configuration</h2>
                 <button id="close-settings" class="btn-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <form id="new-column-form">
-                    <h3>Add New Column</h3>
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="new-col-name" placeholder="Column Name (e.g. Urgent Sales)" required>
-                        <input type="text" id="new-col-key" placeholder="Key (e.g. urgent_sales)" required>
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                        <input type="text" id="new-col-category" placeholder="AI Category Rule (e.g. sales)">
-                        <input type="text" id="new-col-urgency" placeholder="AI Urgency Rule (e.g. high)">
-                    </div>
-                    <button type="submit" class="btn-primary" style="width: 100%">Create Column</button>
-                </form>
-                <hr style="margin: 20px 0; border: 1px solid var(--border-color)">
-                <h3>Existing Columns</h3>
-                <ul id="settings-columns-list" style="list-style: none; padding: 0;"></ul>
+            <div class="modal-body modal-grid">
+                <div class="modal-left">
+                    <form id="new-column-form">
+                        <h3 style="margin-bottom: 1rem; color: var(--accent-primary);">Deploy New Routing Rule</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Create dynamic columns that automatically intercept emails matching specific AI classifications.</p>
+                        
+                        <div class="form-group">
+                            <label>Column Display Name</label>
+                            <input type="text" id="new-col-name" placeholder="e.g. VIP Enterprise Sales" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Internal System Key</label>
+                            <input type="text" id="new-col-key" placeholder="e.g. vip_sales" required>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div class="form-group">
+                                <label>Target AI Category</label>
+                                <input type="text" id="new-col-category" placeholder="e.g. sales">
+                            </div>
+                            <div class="form-group">
+                                <label>Target AI Urgency</label>
+                                <input type="text" id="new-col-urgency" placeholder="e.g. high">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Deploy Rule</button>
+                    </form>
+                </div>
+                <div class="modal-right">
+                    <h3 style="margin-bottom: 15px; color: var(--accent-high);">Active Kanban Columns</h3>
+                    <ul id="settings-columns-list" style="list-style: none; padding: 0;"></ul>
+                </div>
             </div>
         </div>
     </div>
