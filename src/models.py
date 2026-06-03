@@ -7,6 +7,7 @@ class Email(SQLModel, table=True):
     
     id: Optional[int] = Field(default=None, primary_key=True)
     sender: str
+    recipient: str = Field(default="suporte@replyme.local")
     subject: str
     body: str
     body_html: Optional[str] = None

@@ -8,10 +8,10 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 logger = structlog.get_logger(__name__)
 
 class EmailClassification(BaseModel):
-    category: str = Field(description="The category of the email (e.g., support, sales, spam, general)")
-    sentiment: str = Field(description="The sentiment of the email (positive, neutral, negative)")
-    urgency: str = Field(description="The urgency of the email (low, medium, high)")
-    summary: str = Field(description="A brief executive summary of the email content")
+    category: str = Field(description="The category of the email in Portuguese (e.g., Suporte, Vendas, Produtos, Reclamação)")
+    sentiment: str = Field(description="The sentiment of the email in Portuguese (positivo, neutro, negativo)")
+    urgency: str = Field(description="The urgency of the email in Portuguese (baixa, media, alta)")
+    summary: str = Field(description="A brief executive summary of the email content in Portuguese")
     response: str = Field(description="A draft of a professional, polite and direct reply to the customer's email based on the context.")
 
 class AIClassifierService:

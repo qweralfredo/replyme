@@ -35,10 +35,15 @@ def poll_mailpit():
                     
                 subject = detail_data.get("Subject", "No Subject")
                 sender = detail_data.get("From", {}).get("Address", "Unknown")
+                
+                # Fetch recipient (To) address
+                to_addresses = detail_data.get("To", [])
+                recipient = to_addresses[0].get("Address", "suporte@replyme.local") if to_addresses else "suporte@replyme.local"
+
                 body = detail_data.get("Text", "No Body")
                 body_html = detail_data.get("HTML", "")
                 
-                new_email = Email(sender=sender, subject=subject, body=body.strip(), body_html=body_html, status="inbox")
+                new_email = Email(sender=sender, recipient=recipient, subject=subject, body=body.strip(), body_html=body_html, status="inbox")
                 session.add(new_email)
                 session.flush() # Get email.id
                 
@@ -156,7 +161,7 @@ def dispatch_loop():
                                 msg = EmailMessage()
                                 msg.set_content(email.ai_response or "No response provided.")
                                 msg['Subject'] = f"Re: {email.subject}"
-                                msg['From'] = 'suporte@replyme.local'
+                                msg['From'] = email.recipient
                                 msg['To'] = email.sender
                                 
                                 s.send_message(msg)
