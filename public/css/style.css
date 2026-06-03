@@ -66,21 +66,25 @@ body {
 }
 
 .kanban-board {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    display: flex;
     gap: 1.5rem;
     flex: 1;
     min-height: 0;
+    overflow-x: auto;
+    padding-bottom: 10px;
 }
 
 .kanban-column {
     background: var(--bg-glass);
     border: 1px solid var(--border-glass);
     border-radius: 16px;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-width: 320px;
+    flex: 1;
 }
 
 .kanban-column h2 {
@@ -267,14 +271,16 @@ body {
 }
 
 .modal-content {
-    background: #1e293b;
-    border: 1px solid var(--border-glass);
-    border-radius: 16px;
-    width: 90%;
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    width: 95%;
     max-width: 600px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.1);
     transform: translateY(0);
-    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
 }
 
 .modal-backdrop.hidden .modal-content {
@@ -352,4 +358,73 @@ body {
 .sortable-ghost {
     opacity: 0.4;
     background: rgba(255,255,255,0.05);
+}
+
+/* Modal Grid & Responsiveness */
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    text-align: left;
+}
+
+.modal-right {
+    border-left: 1px solid var(--border-glass);
+    padding-left: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.modal-right h3 {
+    margin-bottom: 15px; 
+    color: var(--accent-high);
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* Scrollbar styling for modal-right */
+.modal-right::-webkit-scrollbar {
+    width: 6px;
+}
+.modal-right::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.02);
+}
+.modal-right::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 900px) {
+    .modal-grid {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .modal-right {
+        border-left: none;
+        border-top: 1px solid var(--border-glass);
+        padding-left: 0;
+        padding-top: 20px;
+        max-height: 300px;
+    }
+    
+    .kanban-column {
+        min-width: 280px;
+    }
+}
+
+@media (max-width: 600px) {
+    .app-container {
+        padding: 1rem;
+    }
+    
+    .header h1 {
+        font-size: 2rem;
+    }
+    
+    .modal-content {
+        width: 100%;
+        border-radius: 16px;
+    }
 }
