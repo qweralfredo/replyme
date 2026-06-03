@@ -21,17 +21,31 @@ try {
     } 
     elseif ($method === 'POST') {
         $input = json_decode(file_get_contents('php://input'), true);
-        if (empty($input['name']) || empty($input['url'])) {
-            ResponseFactory::error("Missing name or url", 400);
+        if (empty($input['name']) || (empty($input['url']) && empty($input['command']))) {
+            ResponseFactory::error("Missing name or url/command", 400);
         }
         
-        $sql = "INSERT INTO mcp_servers (name, url, status) VALUES (?, ?, 'pending')";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            $input['name'],
-            $input['url']
-        ]);
-        ResponseFactory::json(['message' => 'MCP Server queued for installation', 'id' => $pdo->lastInsertId()]);
+        $url = $input['url'] ?? '';
+        $command = $input['command'] ?? '';
+
+        if (!empty($command)) {
+            $sql = "INSERT INTO mcp_servers (name, url, status, inferred_command, created_at) VALUES (?, ?, 'installed', ?, CURRENT_TIMESTAMP)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $input['name'],
+                $url,
+                $command
+            ]);
+            ResponseFactory::json(['message' => 'MCP Server cadastrado localmente', 'id' => $pdo->lastInsertId()]);
+        } else {
+            $sql = "INSERT INTO mcp_servers (name, url, status, created_at) VALUES (?, ?, 'pending', CURRENT_TIMESTAMP)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
+                $input['name'],
+                $url
+            ]);
+            ResponseFactory::json(['message' => 'MCP Server queued for installation', 'id' => $pdo->lastInsertId()]);
+        }
     }
     elseif ($method === 'DELETE') {
         $id = $_GET['id'] ?? '';

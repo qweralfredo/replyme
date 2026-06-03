@@ -20,7 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 section.dataset.status = col.status_key;
                 
                 section.innerHTML = `
-                    <h2>${col.name}</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                        <h2 style="margin: 0;">${col.name}</h2>
+                        <button class="btn-assign-mcp" data-col="${col.status_key}" data-name="${col.name}" style="background:none; border:none; cursor:pointer; font-size:1.2rem;" title="Atribuir MCPs a esta coluna">⚙️</button>
+                    </div>
                     <div class="kanban-dropzone" id="drop-${col.status_key}"></div>
                 `;
                 boardContainer.appendChild(section);
@@ -89,6 +92,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
+            // 5. Gear Icons Events
+            document.querySelectorAll('.btn-assign-mcp').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const colKey = e.currentTarget.dataset.col;
+                    const colName = e.currentTarget.dataset.name;
+                    
+                    document.getElementById('assign-col-name').innerText = colName;
+                    document.getElementById('assign-status-key').value = colKey;
+                    
+                    // Find column data to pre-fill
+                    const colData = columns.find(c => c.status_key === colKey);
+                    let assigned = [];
+                    try { assigned = JSON.parse(colData.mcp_servers || '[]'); } catch(e){}
+                    
+                    // Fetch MCPs
+                    const res = await fetch(`${API_URL}/mcp_servers.php`);
+                    const mcps = await res.json();
+                    
+                    const listContainer = document.getElementById('mcp-checkbox-list');
+                    listContainer.innerHTML = '';
+                    
+                    let commonPrompt = '';
+                    mcps.forEach(mcp => {
+                        const isChecked = assigned.find(a => a.mcp_id == mcp.id);
+                        if(isChecked) commonPrompt = isChecked.prompt;
+                        
+                        const div = document.createElement('div');
+                        div.innerHTML = `
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                <input type="checkbox" name="mcp_selection" value="${mcp.id}" ${isChecked ? 'checked' : ''}>
+                                <strong>${mcp.name}</strong> <small style="color:var(--text-muted)">(${mcp.status})</small>
+                            </label>
+                        `;
+                        listContainer.appendChild(div);
+                    });
+                    
+                    document.getElementById('mcp-prompt').value = commonPrompt;
+                    document.getElementById('assign-mcp-modal').classList.remove('hidden');
+                });
+            });
+            
         } catch (err) {
             console.error(err);
             Toastify({
@@ -99,4 +143,37 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     loadBoard();
+
+    document.getElementById('close-assign-mcp').addEventListener('click', () => {
+        document.getElementById('assign-mcp-modal').classList.add('hidden');
+    });
+
+    document.getElementById('assign-mcp-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const colKey = document.getElementById('assign-status-key').value;
+        const promptText = document.getElementById('mcp-prompt').value;
+        
+        const selectedIds = Array.from(document.querySelectorAll('input[name="mcp_selection"]:checked')).map(cb => parseInt(cb.value));
+        const payloadArray = selectedIds.map(id => ({
+            mcp_id: id,
+            prompt: promptText
+        }));
+        
+        try {
+            await fetch(`${API_URL}/columns.php`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    status_key: colKey,
+                    mcp_servers: JSON.stringify(payloadArray)
+                })
+            });
+            
+            document.getElementById('assign-mcp-modal').classList.add('hidden');
+            Toastify({ text: "Atribuição salva", style: { background: "var(--success)" } }).showToast();
+            loadBoard();
+        } catch(err) {
+            console.error(err);
+        }
+    });
 });

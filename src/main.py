@@ -9,7 +9,10 @@ from sqlmodel import Session
 from src.database import engine
 from src.services.ingestion import EmailIngestionService
 from src.services.ai_classifier import AIClassifierService
-from src.models import Email, EmailHistory, KanbanColumn
+from src.models import Email, EmailHistory, KanbanColumn, MCPServer
+import asyncio
+from src.services.mcp_installer import run_installer_loop
+from src.services.mcp_agent import run_mcp_agent
 
 logger = structlog.get_logger(__name__)
 
@@ -123,7 +126,38 @@ def worker_loop():
                                 from_status="processing", 
                                 to_status=matched_status
                             )
-                            session.add(history)
+                            # Execute Agent if Column has MCPs
+                            matched_col = next((c for c in rules if c.status_key == matched_status), None)
+                            if matched_col and matched_col.mcp_servers:
+                                try:
+                                    mcp_configs = json.loads(matched_col.mcp_servers)
+                                    for cfg in mcp_configs:
+                                        mcp_id = cfg.get("mcp_id")
+                                        prompt = cfg.get("prompt")
+                                        
+                                        # fetch MCP server
+                                        from sqlmodel import select
+                                        mcp_server = session.exec(select(MCPServer).where(MCPServer.id == mcp_id)).first()
+                                        
+                                        if mcp_server and mcp_server.status == "installed" and mcp_server.inferred_command:
+                                            # execute agent
+                                            logger.info("Executing MCP Agent", mcp_id=mcp_id, email_id=email.id)
+                                            agent_result = asyncio.run(run_mcp_agent(
+                                                email_json=email.model_dump(),
+                                                prompt=prompt,
+                                                command=mcp_server.inferred_command
+                                            ))
+                                            
+                                            # Save to Tracker (EmailHistory)
+                                            hist = EmailHistory(
+                                                email_id=email.id,
+                                                action=f"Agent Execution (MCP: {mcp_server.name}):\n{agent_result}",
+                                                from_status=matched_status,
+                                                to_status=matched_status
+                                            )
+                                            session.add(hist)
+                                except Exception as e:
+                                    logger.error("Error executing MCP agent", error=str(e))
                             
                         except Exception as e:
                             logger.error("Error classifying email", id=email.id, error=str(e))
@@ -187,11 +221,64 @@ def dispatch_loop():
         
         time.sleep(3)
 
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+class MCPTestHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        if self.path == '/test_mcp':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            data = json.loads(post_data.decode('utf-8'))
+            
+            mcp_id = data.get('mcp_id')
+            prompt = data.get('prompt')
+            
+            try:
+                with Session(engine) as session:
+                    from sqlmodel import select
+                    from src.models import MCPServer
+                    mcp = session.exec(select(MCPServer).where(MCPServer.id == mcp_id)).first()
+                    if not mcp or not mcp.inferred_command:
+                        self.send_response(400)
+                        self.send_header('Content-type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(b'{"error": "MCP not found or not installed"}')
+                        return
+                    command = mcp.inferred_command
+                
+                result = asyncio.run(run_mcp_agent({}, prompt, command))
+                
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"result": result}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+def http_server_loop():
+    server_address = ('0.0.0.0', 8000)
+    httpd = HTTPServer(server_address, MCPTestHandler)
+    logger.info("Starting internal HTTP server on port 8000")
+    httpd.serve_forever()
 
 if __name__ == "__main__":
     # Run dispatch loop in background
     dispatch_thread = Thread(target=dispatch_loop, daemon=True)
     dispatch_thread.start()
+    
+    # Run installer loop in background
+    installer_thread = Thread(target=run_installer_loop, daemon=True)
+    installer_thread.start()
+
+    # Run internal HTTP API in background
+    http_thread = Thread(target=http_server_loop, daemon=True)
+    http_thread.start()
     
     # Run main worker loop
     worker_loop()

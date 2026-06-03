@@ -24,6 +24,18 @@ def migrate():
             session.rollback()
             print("Coluna mcp_servers já existe ou erro ignorado:", e)
 
+        # Drop old mcp_servers table if exists so SQLModel creates it with new schema
+        try:
+            session.exec(text("DROP TABLE IF EXISTS mcp_servers"))
+            session.commit()
+            print("Tabela mcp_servers antiga descartada.")
+        except Exception as e:
+            session.rollback()
+            print("Erro ao descartar tabela mcp_servers:", e)
+
+        print("Provisionando novo schema (se necessário)...")
+        SQLModel.metadata.create_all(engine)
+
         default_columns = [
             KanbanColumn(status_key="inbox", name="Caixa de Entrada", position=1, is_system=True),
             KanbanColumn(status_key="processing", name="Processando", position=2, is_system=True),

@@ -50,8 +50,45 @@ services:
     networks:
       - replyme_network
 
+  helpdesk_mariadb:
+    image: mariadb:10.8
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --skip-character-set-client-handshake
+      - --skip-innodb-read-only-compressed
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - helpdesk_mariadb_data:/var/lib/mysql
+    networks:
+      - replyme_network
+
+  helpdesk_redis:
+    image: redis:alpine
+    networks:
+      - replyme_network
+
+  helpdesk_app:
+    image: frappe/bench:latest
+    command: bash /workspace/frappe_init.sh
+    environment:
+      - SHELL=/bin/bash
+    working_dir: /home/frappe
+    volumes:
+      - .:/workspace
+    ports:
+      - "8001:8000"
+      - "9000:9000"
+    networks:
+      - replyme_network
+    depends_on:
+      - helpdesk_mariadb
+      - helpdesk_redis
+
 volumes:
   db_data:
+  helpdesk_mariadb_data:
 
 networks:
   replyme_network:

@@ -431,16 +431,40 @@ body {
     font-weight: 600;
 }
 
-/* Scrollbar styling for modal-right */
-.modal-right::-webkit-scrollbar {
-    width: 6px;
+/* Premium Global Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
 }
-.modal-right::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.02);
+::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+    border-radius: 4px;
 }
-.modal-right::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.1);
-    border-radius: 3px;
+::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 4px;
+    border: 2px solid rgba(15, 23, 42, 0.5);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.6);
+}
+
+/* Kanban Board Horizontal Scrollbar */
+.kanban-board::-webkit-scrollbar {
+    height: 10px;
+}
+.kanban-board::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+.kanban-board::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.3);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+.kanban-board::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.7);
+    border: 2px solid transparent;
+    background-clip: padding-box;
 }
 
 /* Responsive Media Queries */

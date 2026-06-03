@@ -103,11 +103,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(mcp.status === 'failed') { statusColor = 'var(--accent-high)'; statusText = 'Falhou'; }
                 if(mcp.status === 'testing') { statusColor = 'var(--accent-primary)'; statusText = 'Instalando...'; }
 
+                let displayPath = mcp.url ? mcp.url : (mcp.inferred_command || 'Sem URL/Comando');
                 li.innerHTML = `
-                    <span><strong>${mcp.name}</strong><br><small><a href="${mcp.url}" target="_blank" style="color:var(--accent-low)">${mcp.url}</a></small><br><span style="color:${statusColor}; font-size:0.8rem; font-weight:bold;">${statusText}</span></span>
-                    <button class="btn-delete-mcp" data-id="${mcp.id}">🗑️</button>
+                    <span><strong>${mcp.name}</strong><br><small><span style="color:var(--accent-low)">${displayPath}</span></small><br><span style="color:${statusColor}; font-size:0.8rem; font-weight:bold;">${statusText}</span></span>
+                    <div>
+                        <button class="btn-test-mcp" data-id="${mcp.id}" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; margin-right: 5px;" title="Testar Servidor MCP">🧪</button>
+                        <button class="btn-delete-mcp" data-id="${mcp.id}" style="background: none; border: none; cursor: pointer; font-size: 1.2rem;">🗑️</button>
+                    </div>
                 `;
                 mcpList.appendChild(li);
+            });
+
+            document.querySelectorAll('.btn-test-mcp').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    openMcpTestModal(id);
+                });
             });
 
             document.querySelectorAll('.btn-delete-mcp').forEach(btn => {
@@ -124,8 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const payload = {
             name: document.getElementById('mcp-name').value,
-            url: document.getElementById('mcp-url').value
+            url: document.getElementById('mcp-url').value,
+            command: document.getElementById('mcp-command').value
         };
+
+        if (!payload.url && !payload.command) {
+            Toastify({ text: "Forneça uma URL ou um Comando Local.", backgroundColor: "var(--accent-high)" }).showToast();
+            return;
+        }
 
         await fetch(`${API_URL}/mcp_servers.php`, {
             method: 'POST',
@@ -135,5 +152,52 @@ document.addEventListener('DOMContentLoaded', () => {
         
         newMcpForm.reset();
         loadMcpServers();
+    });
+
+    // --- Test MCP Logic ---
+    let currentTestMcpId = null;
+    const testModal = document.getElementById('test-mcp-modal');
+    const testPrompt = document.getElementById('test-mcp-prompt');
+    const testResult = document.getElementById('test-mcp-result');
+    const btnRunTest = document.getElementById('btn-run-mcp-test');
+
+    function openMcpTestModal(id) {
+        currentTestMcpId = id;
+        testPrompt.value = '';
+        testResult.innerHTML = 'Aguardando teste...';
+        testModal.classList.remove('hidden');
+    }
+
+    btnRunTest.addEventListener('click', async () => {
+        if (!currentTestMcpId) return;
+        const prompt = testPrompt.value.trim();
+        if (!prompt) {
+            Toastify({ text: "Escreva um prompt para testar.", backgroundColor: "var(--accent-high)" }).showToast();
+            return;
+        }
+
+        testResult.innerHTML = '<span style="color: var(--accent-primary);">Iniciando agente... aguarde... (isso pode levar alguns segundos dependendo do prompt)</span>';
+        btnRunTest.disabled = true;
+
+        try {
+            const res = await fetch(`${API_URL}/mcp_test.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mcp_id: currentTestMcpId, prompt: prompt })
+            });
+            const data = await res.json();
+            
+            if (data.error) {
+                testResult.innerHTML = `<span style="color: var(--accent-high);">Erro: ${data.error}</span>`;
+            } else if (data.result) {
+                testResult.innerHTML = data.result.replace(/\n/g, '<br>');
+            } else {
+                testResult.innerHTML = 'Resposta inesperada: ' + JSON.stringify(data);
+            }
+        } catch (e) {
+            testResult.innerHTML = `<span style="color: var(--accent-high);">Erro de rede: ${e.message}</span>`;
+        } finally {
+            btnRunTest.disabled = false;
+        }
     });
 });

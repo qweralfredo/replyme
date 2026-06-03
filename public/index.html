@@ -80,30 +80,60 @@
 
     <!-- MCP Settings Modal -->
     <div id="mcp-settings-modal" class="modal-backdrop hidden">
-        <div class="modal-content modal-large">
+        <div class="modal-content" style="max-width: 800px; width: 90%;">
             <div class="modal-header">
-                <h2>Gerenciar Servidores MCP</h2>
-                <button id="close-mcp-settings" class="btn-close">&times;</button>
+                <h2>Servidores MCP 🔌</h2>
+                <button class="btn-close" id="close-mcp-settings">×</button>
             </div>
             <div class="modal-body modal-grid">
                 <div class="modal-left">
                     <form id="new-mcp-form">
-                        <h3 style="margin-bottom: 1rem; color: var(--accent-primary);">Instalar Servidor MCP (Via Agente)</h3>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Forneça a URL do repositório ou documentação. Nossa IA cuidará da instalação, configuração e testes automaticamente.</p>
+                        <h3 style="margin-bottom: 1rem; color: var(--accent-primary);">Instalar Servidor MCP</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Forneça a URL do repositório para instalação agêntica OU o comando local do script se já possuir um localmente.</p>
                         <div class="form-group">
                             <label>Nome de Exibição</label>
                             <input type="text" id="mcp-name" placeholder="Ex: MySQL Explorer" required>
                         </div>
                         <div class="form-group">
-                            <label>URL (GitHub ou NPM)</label>
-                            <input type="text" id="mcp-url" placeholder="Ex: https://github.com/smithery-co/mcp-server" required>
+                            <label>URL (Instalação Agêntica - Opcional se usar Comando)</label>
+                            <input type="text" id="mcp-url" placeholder="Ex: https://github.com/smithery-co/mcp-server">
                         </div>
-                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Iniciar Instalação Agêntica</button>
+                        <div class="form-group">
+                            <label>Comando Local (Opcional se usar URL)</label>
+                            <input type="text" id="mcp-command" placeholder="Ex: python /app/src/mcp/frappe_helpdesk_mcp.py">
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Adicionar Servidor</button>
                     </form>
                 </div>
                 <div class="modal-right">
-                    <h3 style="margin-bottom: 15px; color: var(--accent-high);">Servidores Cadastrados</h3>
-                    <ul id="mcp-servers-list" style="list-style: none; padding: 0;"></ul>
+                    <h3 style="margin-bottom: 1rem; color: var(--text-light);">Servidores Instalados</h3>
+                    <ul id="mcp-servers-list" style="list-style: none; padding: 0;">
+                        <!-- dynamic list -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MCP Test Modal -->
+    <div id="test-mcp-modal" class="modal-backdrop hidden" style="z-index: 10000;">
+        <div class="modal-content" style="max-width: 600px; width: 90%;">
+            <div class="modal-header">
+                <h2>Testar MCP Server 🧪</h2>
+                <button class="btn-close" id="close-test-mcp" onclick="document.getElementById('test-mcp-modal').classList.add('hidden')">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Envie um prompt para testar se as *Tools* do servidor estão funcionando e se o agente consegue interagir.</p>
+                <div class="form-group">
+                    <label>Prompt</label>
+                    <textarea id="test-mcp-prompt" placeholder="Ex: Use a tool de listar chamados e me mostre o resultado..." rows="3" style="width:100%; border-radius:8px; padding:10px; background: rgba(15,23,42,0.8); border:1px solid rgba(255,255,255,0.1); color: var(--text-light);"></textarea>
+                </div>
+                <button id="btn-run-mcp-test" class="btn-primary" style="width: 100%; margin-bottom: 1rem;">Executar Teste</button>
+                <div class="form-group">
+                    <label>Resultado do Agente</label>
+                    <div id="test-mcp-result" style="width:100%; height: 200px; border-radius:8px; padding:10px; background: #0f172a; border:1px solid rgba(255,255,255,0.1); color: var(--accent-secondary); overflow-y: auto; font-family: monospace; font-size: 0.85rem;">
+                        Aguardando teste...
+                    </div>
                 </div>
             </div>
         </div>
